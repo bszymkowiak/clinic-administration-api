@@ -29,6 +29,11 @@ dependencies {
 	compileOnly("org.projectlombok:lombok")
 	annotationProcessor("org.projectlombok:lombok")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
+	implementation ( "org.hibernate:hibernate-entitymanager:5.4.29.Final")
+	implementation ("org.postgresql:postgresql:42.2.19")
+
+
+
 }
 
 tasks.withType<KotlinCompile> {
