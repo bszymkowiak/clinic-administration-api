@@ -1,8 +1,11 @@
 package com.bartek.clinicadministrationapi.domain.dtos
 
-data class PatientDTO(
+data class DoctorDTO(
+
     var id: Long? = null,
     var firstName: String?,
     var lastName: String?,
-    var address: String?
+    var specialisation: String?
+
+
 )

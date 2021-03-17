@@ -1,8 +1,8 @@
 package com.bartek.clinicadministrationapi.repositories
-import com.bartek.clinicadministrationapi.domain.daos.PatientDAO
+import com.bartek.clinicadministrationapi.domain.daos.DoctorDAO
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Repository
 
 @Repository
-interface PatientRepository : CrudRepository<PatientDAO, Long> {
+interface DoctorRepository: CrudRepository<DoctorDAO, Long> {
 }
