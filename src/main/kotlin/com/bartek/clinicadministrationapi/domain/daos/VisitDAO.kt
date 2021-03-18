@@ -12,13 +12,8 @@ data class VisitDAO(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(name = "date")
     val date: Date,
-
-    @Column(name = "dateTime")
     val dateTime: Time,
-
-    @Column(name = "place")
     val place: String,
 
     @OneToOne
@@ -29,4 +24,4 @@ data class VisitDAO(
     @JoinColumn(name = "doctor_id", referencedColumnName = "id")
     val doctor: DoctorDAO,
 
-)
+    )

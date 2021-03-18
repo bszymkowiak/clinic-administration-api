@@ -14,14 +14,12 @@ class PatientController(val service: PatientService) {
 
     @PostMapping("/patients")
     fun addPatient(@RequestBody patientDTO: PatientDTO): ResponseEntity<PatientDTO> {
-
         return service.addPatient(patientDTO)
     }
 
     @DeleteMapping("/patients/{id}")
     fun removePatientById(@PathVariable id: Long): ResponseEntity<PatientDTO>{
         return service.deletePatientById(id)
-
     }
 
     @PutMapping("/patients")
