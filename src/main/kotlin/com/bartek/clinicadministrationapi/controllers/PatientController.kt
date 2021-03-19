@@ -12,6 +12,12 @@ class PatientController(val service: PatientService) {
         return service.getPatientById(id)
     }
 
+    @GetMapping("/patients")
+    fun getAllPatients(): ResponseEntity<Set<PatientDTO>> {
+
+        return service.getAllPatients()
+    }
+
     @PostMapping("/patients")
     fun addPatient(@RequestBody patientDTO: PatientDTO): ResponseEntity<PatientDTO> {
         return service.addPatient(patientDTO)
