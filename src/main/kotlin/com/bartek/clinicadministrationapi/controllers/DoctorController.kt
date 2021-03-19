@@ -15,6 +15,11 @@ class DoctorController(
         return service.findDoctorById(id)
     }
 
+    @GetMapping("/doctors")
+    fun getAllDoctors(): ResponseEntity<Set<DoctorDTO>> {
+        return service.getDoctors()
+    }
+
     @PostMapping("/doctors")
     fun addDoctor(@RequestBody doctorDTO: DoctorDTO): ResponseEntity<DoctorDTO> {
         return service.addDoctorToDb(doctorDTO)
