@@ -1,5 +1,6 @@
 package com.bartek.clinicadministrationapi.domain.daos
 
+import org.springframework.format.annotation.DateTimeFormat
 import java.sql.Date
 import java.sql.Time
 import javax.persistence.*

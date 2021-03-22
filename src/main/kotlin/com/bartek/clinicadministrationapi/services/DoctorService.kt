@@ -14,8 +14,7 @@ import org.springframework.stereotype.Service
 class DoctorService(
     val doctorRepository: DoctorRepository,
     val doctorMapper: DoctorMapper,
-    val visitRepository: VisitRepository,
-    val visitMapper: VisitMapper
+    val visitRepository: VisitRepository
 ) {
 
     fun findDoctorById(id: Long): ResponseEntity<DoctorDTO> {
@@ -27,35 +26,20 @@ class DoctorService(
     }
 
     fun addDoctorToDb(doctorDTO: DoctorDTO): ResponseEntity<DoctorDTO> {
-
-        if (doctorDTO.firstName != null && doctorDTO.lastName != null && doctorDTO.specialisation != null) {
-            doctorRepository.save(doctorMapper.mapDTOToDAO(doctorDTO))
-        } else {
-            return ResponseEntity(doctorDTO, HttpStatus.BAD_REQUEST)
-        }
+        doctorRepository.save(doctorMapper.mapDTOToDAO(doctorDTO))
 
         return ResponseEntity(HttpStatus.OK)
     }
 
     fun deleteDoctorById(id: Long): ResponseEntity<DoctorDTO> {
 
-        val set: Set<VisitDTO> = visitRepository
-            .findAll()
-            .map { visitDAO -> visitMapper.mapDAOToDTO(visitDAO) }
-            .filter { visitDTO -> visitDTO.doctor.id == id }
-            .toSet()
-
-        set
-            .map { visitDTO -> visitDTO.id }
-            .map { visitId -> visitId?.let { visitRepository.deleteById(it) } }
-
-        if (doctorRepository.findById(id).equals(null)) {
-            return ResponseEntity(HttpStatus.NOT_FOUND)
+        return if (doctorRepository.findById(id).equals(null)) {
+            ResponseEntity(HttpStatus.NOT_FOUND)
         } else {
+            visitRepository.deleteVisitsByDoctorId(id)
             doctorRepository.deleteById(id)
+            ResponseEntity(HttpStatus.OK)
         }
-
-        return ResponseEntity(HttpStatus.OK)
     }
 
     fun updateDoctor(doctorDTO: DoctorDTO): ResponseEntity<DoctorDTO>? {

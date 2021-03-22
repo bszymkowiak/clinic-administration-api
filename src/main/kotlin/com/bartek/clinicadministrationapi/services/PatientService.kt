@@ -1,9 +1,7 @@
 package com.bartek.clinicadministrationapi.services
 
 import com.bartek.clinicadministrationapi.domain.dtos.PatientDTO
-import com.bartek.clinicadministrationapi.domain.dtos.VisitDTO
 import com.bartek.clinicadministrationapi.mappers.PatientMapper
-import com.bartek.clinicadministrationapi.mappers.VisitMapper
 import com.bartek.clinicadministrationapi.repositories.PatientRepository
 import com.bartek.clinicadministrationapi.repositories.VisitRepository
 import org.springframework.http.HttpStatus
@@ -14,8 +12,7 @@ import org.springframework.stereotype.Service
 class PatientService(
     val patientRepository: PatientRepository,
     val patientMapper: PatientMapper,
-    val visitRepository: VisitRepository,
-    val visitMapper: VisitMapper
+    val visitRepository: VisitRepository
 ) {
 
     fun getPatientById(id: Long): ResponseEntity<PatientDTO> {
@@ -27,34 +24,20 @@ class PatientService(
 
     fun addPatient(patientDTO: PatientDTO): ResponseEntity<PatientDTO> {
 
-        if (patientDTO.firstName != null && patientDTO.lastName != null && patientDTO.address != null) {
-            patientRepository.save(patientMapper.mapDTOToDAO(patientDTO))
-        } else {
-            return ResponseEntity(patientDTO, HttpStatus.BAD_REQUEST)
-        }
+        patientRepository.save(patientMapper.mapDTOToDAO(patientDTO))
 
         return ResponseEntity(HttpStatus.OK)
     }
 
     fun deletePatientById(id: Long): ResponseEntity<PatientDTO> {
 
-        val set: Set<VisitDTO> = visitRepository
-            .findAll()
-            .map { visitDAO -> visitMapper.mapDAOToDTO(visitDAO) }
-            .filter { visitDTO -> visitDTO.patient.id == id }
-            .toSet()
-
-        set
-            .map { visitDTO -> visitDTO.id }
-            .map { visitId -> visitId?.let { visitRepository.deleteById(it) } }
-
-        if (patientRepository.findById(id).equals(null)) {
-            return ResponseEntity(HttpStatus.NOT_FOUND)
+        return if (patientRepository.findById(id).equals(null)) {
+            ResponseEntity(HttpStatus.NOT_FOUND)
         } else {
+            visitRepository.deleteVisitsByPatientId(id)
             patientRepository.deleteById(id)
+            ResponseEntity(HttpStatus.OK)
         }
-
-        return ResponseEntity(HttpStatus.OK)
     }
 
     fun updatePatient(patientDTO: PatientDTO): ResponseEntity<PatientDTO>? {
