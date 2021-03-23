@@ -4,6 +4,7 @@ import com.bartek.clinicadministrationapi.domain.dtos.DoctorDTO
 import com.bartek.clinicadministrationapi.services.DoctorService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 class DoctorController(
@@ -15,8 +16,13 @@ class DoctorController(
         return service.findDoctorById(id)
     }
 
+    @GetMapping("/doctors")
+    fun getAllDoctors(): ResponseEntity<Set<DoctorDTO>> {
+        return service.getDoctors()
+    }
+
     @PostMapping("/doctors")
-    fun addDoctor(@RequestBody doctorDTO: DoctorDTO): ResponseEntity<DoctorDTO> {
+    fun addDoctor(@RequestBody @Valid doctorDTO: DoctorDTO): ResponseEntity<DoctorDTO> {
         return service.addDoctorToDb(doctorDTO)
     }
 
