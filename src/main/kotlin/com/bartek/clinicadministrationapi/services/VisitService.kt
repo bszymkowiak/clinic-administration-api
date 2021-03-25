@@ -20,7 +20,7 @@ class VisitService(
         }?.let { visitMapper.mapDAOToDTO(it) }
 
         return if (isTrue != null) {
-            ResponseEntity(HttpStatus.BAD_REQUEST)
+            ResponseEntity(HttpStatus.NOT_FOUND)
         } else {
             visitRepository.save(visitMapper.mapDTOToDAO(visitDTO))
             ResponseEntity(HttpStatus.OK)

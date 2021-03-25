@@ -4,12 +4,13 @@ import com.bartek.clinicadministrationapi.domain.dtos.VisitDTO
 import com.bartek.clinicadministrationapi.services.VisitService
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.validation.Valid
 
 @RestController
 class VisitController(val service: VisitService) {
 
     @PostMapping("/visits")
-    fun addVisitToDb(@RequestBody visitDTO: VisitDTO): ResponseEntity<VisitDTO> {
+    fun addVisit(@RequestBody @Valid visitDTO: VisitDTO): ResponseEntity<VisitDTO> {
         return service.addVisit(visitDTO)
     }
 

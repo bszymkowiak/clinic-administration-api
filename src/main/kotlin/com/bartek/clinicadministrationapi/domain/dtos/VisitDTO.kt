@@ -2,7 +2,6 @@ package com.bartek.clinicadministrationapi.domain.dtos
 
 import com.bartek.clinicadministrationapi.domain.daos.DoctorDAO
 import com.bartek.clinicadministrationapi.domain.daos.PatientDAO
-import org.springframework.format.annotation.DateTimeFormat
 import java.sql.Date
 import java.sql.Time
 import javax.validation.constraints.NotNull
@@ -11,14 +10,14 @@ data class VisitDTO(
 
     var id: Long? = null,
 
-    @NotNull
+    @field:NotNull
     var date: Date,
-    @NotNull
+    @field:NotNull
     var dateTime: Time,
-    @NotNull
+    @field:NotNull
     var place: String,
-    @NotNull
+    @field:NotNull
     var patient: PatientDAO,
-    @NotNull
-    var doctor: DoctorDAO,
+    @field:NotNull
+    var doctor: DoctorDAO
 )

@@ -1,14 +1,11 @@
 package com.bartek.clinicadministrationapi.services
 
 import com.bartek.clinicadministrationapi.domain.dtos.DoctorDTO
-import com.bartek.clinicadministrationapi.domain.dtos.VisitDTO
 import com.bartek.clinicadministrationapi.mappers.DoctorMapper
-import com.bartek.clinicadministrationapi.mappers.VisitMapper
 import com.bartek.clinicadministrationapi.repositories.DoctorRepository
 import com.bartek.clinicadministrationapi.repositories.VisitRepository
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class DoctorService(
@@ -17,48 +14,51 @@ class DoctorService(
     val visitRepository: VisitRepository
 ) {
 
-    fun findDoctorById(id: Long): ResponseEntity<DoctorDTO> {
+    fun getDoctorById(id: Long): Optional<DoctorDTO> {
 
         return doctorRepository.findById(id)
             .map { doctorDAO -> doctorMapper.mapDAOToDTO(doctorDAO) }
-            .map { doctorDTO -> ResponseEntity(doctorDTO, HttpStatus.OK) }
-            .orElseGet { ResponseEntity(HttpStatus.NOT_FOUND) }
     }
 
-    fun addDoctorToDb(doctorDTO: DoctorDTO): ResponseEntity<DoctorDTO> {
-        doctorRepository.save(doctorMapper.mapDTOToDAO(doctorDTO))
+    fun addDoctor(doctorDTO: DoctorDTO): Optional<DoctorDTO> {
 
-        return ResponseEntity(HttpStatus.OK)
+        val opt = Optional.of(doctorRepository.save(doctorMapper.mapDTOToDAO(doctorDTO)))
+
+        return opt
+            .map { doctorDTO -> doctorMapper.mapDAOToDTO(doctorDTO) }
     }
 
-    fun deleteDoctorById(id: Long): ResponseEntity<DoctorDTO> {
+    fun deleteDoctorById(id: Long): Optional<DoctorDTO> {
 
-        return if (doctorRepository.findById(id).equals(null)) {
-            ResponseEntity(HttpStatus.NOT_FOUND)
-        } else {
+        val doctorOpt = doctorRepository.findById(id)
+            .map { doctorDAO -> doctorMapper.mapDAOToDTO(doctorDAO) }
+
+        if (!doctorOpt.equals(null)) {
             visitRepository.deleteVisitsByDoctorId(id)
             doctorRepository.deleteById(id)
-            ResponseEntity(HttpStatus.OK)
         }
+
+        return doctorOpt
     }
 
-    fun updateDoctor(doctorDTO: DoctorDTO): ResponseEntity<DoctorDTO>? {
+    fun updateDoctor(doctorDTO: DoctorDTO): Optional<DoctorDTO>? {
 
-        return doctorDTO.id?.let {
+        val doctorOpt = doctorDTO.id?.let {
             doctorRepository.findById(it)
-                .map { doctorRepository.save(doctorMapper.mapDTOToDAO(doctorDTO)) }
                 .map { doctorDAO -> doctorMapper.mapDAOToDTO(doctorDAO) }
-                .map { dostorDTO -> ResponseEntity(doctorDTO, HttpStatus.OK) }
-                .orElseGet { ResponseEntity(HttpStatus.NOT_FOUND) }
         }
+
+        if (doctorOpt != null) {
+            doctorRepository.save(doctorMapper.mapDTOToDAO(doctorDTO))
+        }
+
+        return doctorOpt
     }
 
-    fun getDoctors(): ResponseEntity<Set<DoctorDTO>> {
-        val set: Set<DoctorDTO> = doctorRepository
-            .findAll()
-            .map { doctorDAO -> doctorMapper.mapDAOToDTO(doctorDAO) }
-            .toSet()
+    fun getAllDoctors(): Optional<Set<DoctorDTO>> {
 
-        return ResponseEntity(set, HttpStatus.OK)
+        return Optional.of(doctorRepository.findAll()
+            .map { doctorDAO -> doctorMapper.mapDAOToDTO(doctorDAO) }
+            .toSet())
     }
 }
