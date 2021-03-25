@@ -7,6 +7,7 @@ import com.bartek.clinicadministrationapi.repositories.VisitRepository
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class PatientService(
@@ -15,48 +16,52 @@ class PatientService(
     val visitRepository: VisitRepository
 ) {
 
-    fun getPatientById(id: Long): ResponseEntity<PatientDTO> {
+    fun getPatientById(id: Long): Optional<PatientDTO> {
+
         return patientRepository.findById(id)
             .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
-            .map { patientDTO -> ResponseEntity(patientDTO, HttpStatus.OK) }
-            .orElseGet { ResponseEntity(HttpStatus.NOT_FOUND) }
     }
 
-    fun addPatient(patientDTO: PatientDTO): ResponseEntity<PatientDTO> {
+    fun addPatient(patientDTO: PatientDTO): Optional<PatientDTO> {
 
-        patientRepository.save(patientMapper.mapDTOToDAO(patientDTO))
+        val opt = Optional.of(patientRepository.save(patientMapper.mapDTOToDAO(patientDTO)))
 
-        return ResponseEntity(HttpStatus.OK)
+        return opt
+            .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
     }
 
-    fun deletePatientById(id: Long): ResponseEntity<PatientDTO> {
+    fun deletePatientById(id: Long): Optional<PatientDTO> {
 
-        return if (patientRepository.findById(id).equals(null)) {
-            ResponseEntity(HttpStatus.NOT_FOUND)
-        } else {
+        val patientOpt = patientRepository.findById(id)
+            .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
+
+        if (!patientOpt.equals(null)) {
             visitRepository.deleteVisitsByPatientId(id)
             patientRepository.deleteById(id)
-            ResponseEntity(HttpStatus.OK)
         }
+
+        return patientOpt
     }
 
-    fun updatePatient(patientDTO: PatientDTO): ResponseEntity<PatientDTO>? {
+    fun updatePatient(patientDTO: PatientDTO): Optional<PatientDTO>? {
 
-        return patientDTO.id?.let {
+        val patientOpt = patientDTO.id?.let {
             patientRepository.findById(it)
-                .map { patientRepository.save(patientMapper.mapDTOToDAO(patientDTO)) }
                 .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
-                .map { patientDTO -> ResponseEntity(patientDTO, HttpStatus.OK) }
-                .orElseGet { ResponseEntity(HttpStatus.NOT_FOUND) }
         }
+
+        if (patientOpt != null) {
+            patientRepository.save(patientMapper.mapDTOToDAO(patientDTO))
+        }
+
+        return patientOpt
     }
 
-    fun getAllPatients(): ResponseEntity<Set<PatientDTO>> {
-        val set: Set<PatientDTO> = patientRepository
+    fun getAllPatients(): Optional<Set<PatientDTO>> {
+
+        return Optional.of(patientRepository
             .findAll()
             .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
-            .toSet()
-
-        return ResponseEntity(set, HttpStatus.OK)
+            .toSet())
     }
 }

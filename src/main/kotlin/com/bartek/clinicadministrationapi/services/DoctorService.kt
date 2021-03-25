@@ -25,7 +25,7 @@ class DoctorService(
         val opt = Optional.of(doctorRepository.save(doctorMapper.mapDTOToDAO(doctorDTO)))
 
         return opt
-            .map { doctorDTO -> doctorMapper.mapDAOToDTO(doctorDTO) }
+            .map { doctorDAO -> doctorMapper.mapDAOToDTO(doctorDAO) }
     }
 
     fun deleteDoctorById(id: Long): Optional<DoctorDTO> {
@@ -36,7 +36,7 @@ class DoctorService(
         if (!doctorOpt.equals(null)) {
             visitRepository.deleteVisitsByDoctorId(id)
             doctorRepository.deleteById(id)
-        }
+        } 
 
         return doctorOpt
     }

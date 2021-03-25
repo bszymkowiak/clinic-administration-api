@@ -15,11 +15,11 @@ import java.util.*
 
 class DoctorServiceTest {
 
-    val repository = mockk<DoctorRepository>()
+    val doctorRepository = mockk<DoctorRepository>()
     val doctorMapper = mockk<DoctorMapper>()
     val visitRepository = mockk<VisitRepository>()
 
-    val service = DoctorService(repository, doctorMapper, visitRepository)
+    val service = DoctorService(doctorRepository, doctorMapper, visitRepository)
 
     @Test
     fun `getDoctorById returns Optional`() {
@@ -28,10 +28,10 @@ class DoctorServiceTest {
         val doctorTestDTO = Optional.of(DoctorDTO(1, "Test", "Doctor", "Get"))
 
         every { doctorMapper.mapDAOToDTO(doctorTestDAO.get()) } returns doctorTestDTO.get()
-        every { repository.findById(1) } returns doctorTestDAO
+        every { doctorRepository.findById(1) } returns doctorTestDAO
 
         assertEquals(doctorTestDTO, service.getDoctorById(1))
-        verify { repository.findById(1) }
+        verify { doctorRepository.findById(1) }
     }
 
     @Test
@@ -41,56 +41,55 @@ class DoctorServiceTest {
         val doctorTestDTO = DoctorDTO(1, "Test", "Doctor", "Add")
 
         every { doctorMapper.mapDTOToDAO(doctorTestDTO) } returns doctorTestDAO
-        every { repository.save(doctorTestDAO) } returns doctorTestDAO
+        every { doctorRepository.save(doctorTestDAO) } returns doctorTestDAO
         every { doctorMapper.mapDAOToDTO(doctorTestDAO) } returns doctorTestDTO
 
         assertEquals(Optional.of(doctorTestDTO), service.addDoctor(doctorTestDTO))
-        verify { repository.save(doctorTestDAO) }
+        verify { doctorRepository.save(doctorTestDAO) }
     }
 
     @Test
     fun `deleteDoctorById returns Optional`() {
 
-        val doctorTestDAO = Optional.of(DoctorDAO(1, "Test", "Doctor", "Get"))
-        val doctorTestDTO = Optional.of(DoctorDTO(1, "Test", "Doctor", "Get"))
+        val doctorTestDAO = Optional.of(DoctorDAO(1, "Test", "Doctor", "Delete"))
+        val doctorTestDTO = Optional.of(DoctorDTO(1, "Test", "Doctor", "Delete"))
 
-        every { repository.findById(1) } returns doctorTestDAO
+        every { doctorRepository.findById(1) } returns doctorTestDAO
         every { doctorMapper.mapDAOToDTO(doctorTestDAO.get()) } returns doctorTestDTO.get()
-        every { repository.deleteById(1) } returns Unit
+        every { doctorRepository.deleteById(1) } returns Unit
         every { visitRepository.deleteVisitsByDoctorId(1) } returns Unit
 
         assertEquals(doctorTestDTO, service.deleteDoctorById(1))
-        verify { repository.findById(1) }
+        verify { doctorRepository.findById(1) }
     }
 
     @Test
     fun `updateDoctor returns Optional`() {
 
-        val doctorTestDTO = Optional.of(DoctorDTO(1, "Test", "Doctor", "Add"))
-        val doctorTestDAO = Optional.of(DoctorDAO(1, "Test", "Doctor", "Add"))
+        val doctorTestDTO = Optional.of(DoctorDTO(1, "Test", "Doctor", "Update"))
+        val doctorTestDAO = Optional.of(DoctorDAO(1, "Test", "Doctor", "Update"))
 
-        every { repository.findById(1) } returns doctorTestDAO
+        every { doctorRepository.findById(1) } returns doctorTestDAO
         every { doctorMapper.mapDTOToDAO(doctorTestDTO.get()) } returns doctorTestDAO.get()
         every { doctorMapper.mapDAOToDTO(doctorTestDAO.get()) } returns doctorTestDTO.get()
-        every { repository.save(doctorTestDAO.get()) } returns doctorTestDAO.get()
+        every { doctorRepository.save(doctorTestDAO.get()) } returns doctorTestDAO.get()
 
         assertEquals(doctorTestDTO, service.updateDoctor(doctorTestDTO.get()))
-        verify { repository.save(doctorTestDAO.get()) }
+        verify { doctorRepository.save(doctorTestDAO.get()) }
     }
 
 
     @Test
     fun `getAllDoctors returns Optional`() {
 
-        val doctorTestDTO = Optional.of(DoctorDTO(1, "Test", "Doctor", "Add"))
-        val doctorTestDAO = Optional.of(DoctorDAO(1, "Test", "Doctor", "Add"))
+        val doctorTestDTO = Optional.of(DoctorDTO(1, "Test", "Doctor", "GetAll"))
+        val doctorTestDAO = Optional.of(DoctorDAO(1, "Test", "Doctor", "GetAll"))
         val setTest: Optional<Set<DoctorDAO>> = Optional.of(setOf())
 
-        every { repository.findAll() } returns setTest.get()
+        every { doctorRepository.findAll() } returns setTest.get()
         every { doctorMapper.mapDAOToDTO(doctorTestDAO.get()) } returns doctorTestDTO.get()
 
         assertEquals(setTest, service.getAllDoctors())
-        verify { repository.findAll() }
-
+        verify { doctorRepository.findAll() }
     }
 }
