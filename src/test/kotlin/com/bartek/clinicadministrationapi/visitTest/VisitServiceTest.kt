@@ -12,6 +12,8 @@ import io.mockk.mockk
 import io.mockk.verify
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Test
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import java.sql.Date
 import java.sql.Time
 import java.time.LocalDateTime
@@ -24,7 +26,7 @@ class VisitServiceTest {
     val service = VisitService(visitRepository, visitMapper)
 
     @Test
-    fun `addVisit returns Optional`() {
+    fun `addVisit returns HttpStatusBadRequest`() {
 
         val patientTestDAO = PatientDAO(1, "Test", "Patient", "Test")
         val doctorTestDAO = DoctorDAO(1, "Test", "Doctor", "Test")
@@ -44,12 +46,12 @@ class VisitServiceTest {
                     it
                 )
             }
-        } returns Optional.of(visitTestDAO)
+        } returns visitTestDAO
 
         every { visitMapper.mapDAOToDTO(visitTestDAO) } returns visitTestDTO
         every { visitRepository.save(visitTestDAO) } returns visitTestDAO
 
-        assertEquals(service.addVisit(visitTestDTO), Optional.of(visitTestDTO))
+        assertEquals(service.addVisit(visitTestDTO), ResponseEntity(null, HttpStatus.BAD_REQUEST))
         verify {
             visitTestDTO.doctor.id?.let {
                 visitRepository.findVisitsByDateAndDateTimeAndDoctorId(
@@ -125,7 +127,7 @@ class VisitServiceTest {
                     it
                 )
             }
-        } returns Optional.of(visitTestDAO)
+        } returns visitTestDAO
         every { visitMapper.mapDAOToDTO(visitTestDAO) } returns visitTestDTO
         every { visitRepository.findById(1) } returns Optional.of(visitTestDAO)
         every { visitMapper.mapDTOToDAO(visitTestDTO) } returns visitTestDAO

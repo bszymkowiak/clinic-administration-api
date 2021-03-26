@@ -20,14 +20,6 @@ class DoctorMapperTest {
     }
 
     @Test
-    fun `mapDAOtoDTO returns null`() {
-
-        val doctorTestDAO = null
-
-        assertEquals(null, doctorTestDAO?.let { doctorMapper.mapDAOToDTO(it) })
-    }
-
-    @Test
     fun `mapDTOtoDAO returns DoctorDAO`() {
 
         val doctorTestDAO = DoctorDAO(1, "Test", "Test", "Test")
@@ -35,16 +27,4 @@ class DoctorMapperTest {
 
         assertEquals(doctorTestDAO, doctorMapper.mapDTOToDAO(doctorTestDTO))
     }
-
-    @Test
-    fun `mapDTOtoDAO returns null`() {
-
-        val doctorTestDTO = null
-
-        assertEquals(null, doctorTestDTO?.let { doctorMapper.mapDTOToDAO(it) })
-    }
-
-
-
-
 }

@@ -2,6 +2,7 @@ package com.bartek.clinicadministrationapi.controllers
 
 import com.bartek.clinicadministrationapi.domain.dtos.VisitDTO
 import com.bartek.clinicadministrationapi.services.VisitService
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
@@ -13,8 +14,6 @@ class VisitController(val service: VisitService) {
     @PostMapping("/visits")
     fun addVisit(@RequestBody @Valid visitDTO: VisitDTO): ResponseEntity<VisitDTO>? {
         return service.addVisit(visitDTO)
-            ?.map { visitDTO -> ResponseEntity(visitDTO, HttpStatus.OK) }
-            ?.orElseGet { ResponseEntity(HttpStatus.BAD_REQUEST) }
     }
 
     @GetMapping("/visits/{id}")
@@ -39,9 +38,17 @@ class VisitController(val service: VisitService) {
     }
 
     @PutMapping("/visits")
-    fun updateVisit(@RequestBody visitDTO: VisitDTO): ResponseEntity<VisitDTO>? {
+    fun updateVisit(@RequestBody @Valid visitDTO: VisitDTO): ResponseEntity<VisitDTO>? {
         return service.updateVisit(visitDTO)
             ?.map { visitDTO -> ResponseEntity(visitDTO, HttpStatus.OK) }
             ?.orElseGet { ResponseEntity(HttpStatus.NOT_FOUND) }
+    }
+
+    @ExceptionHandler(EmptyResultDataAccessException::class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    fun handleEmptyResultDataAccessException(exception: EmptyResultDataAccessException): ResponseEntity<String> {
+        return ResponseEntity
+            .status(HttpStatus.NOT_FOUND)
+            .body(exception.message)
     }
 }

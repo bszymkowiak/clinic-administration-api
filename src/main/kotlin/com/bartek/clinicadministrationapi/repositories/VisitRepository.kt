@@ -18,7 +18,7 @@ interface VisitRepository : CrudRepository<VisitDAO, Long> {
     fun deleteVisitsByDoctorId(id: Long)
 
     @Transactional
-    fun findVisitsByDateAndDateTimeAndDoctorId(date: Date, time: Time, id: Long) : Optional<VisitDAO>
+    fun findVisitsByDateAndDateTimeAndDoctorId(date: Date, time: Time, id: Long) : VisitDAO?
 
     @Transactional
     fun findVisitsByPatientId(id: Long) : Set<VisitDAO>

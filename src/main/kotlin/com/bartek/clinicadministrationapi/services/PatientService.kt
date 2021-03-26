@@ -4,6 +4,7 @@ import com.bartek.clinicadministrationapi.domain.dtos.PatientDTO
 import com.bartek.clinicadministrationapi.mappers.PatientMapper
 import com.bartek.clinicadministrationapi.repositories.PatientRepository
 import com.bartek.clinicadministrationapi.repositories.VisitRepository
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
@@ -18,8 +19,14 @@ class PatientService(
 
     fun getPatientById(id: Long): Optional<PatientDTO> {
 
-        return patientRepository.findById(id)
+        val optPatient = patientRepository.findById(id)
             .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
+
+        return if (optPatient.isPresent) {
+            optPatient
+        } else {
+            throw EmptyResultDataAccessException("Patient not found by this id", 0)
+        }
     }
 
     fun addPatient(patientDTO: PatientDTO): Optional<PatientDTO> {
@@ -35,12 +42,13 @@ class PatientService(
         val patientOpt = patientRepository.findById(id)
             .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
 
-        if (!patientOpt.equals(null)) {
+        return if (!patientOpt.equals(null)) {
             visitRepository.deleteVisitsByPatientId(id)
             patientRepository.deleteById(id)
+            patientOpt
+        } else {
+            throw EmptyResultDataAccessException("Doctor not found by this id", 0)
         }
-
-        return patientOpt
     }
 
     fun updatePatient(patientDTO: PatientDTO): Optional<PatientDTO>? {
@@ -50,18 +58,21 @@ class PatientService(
                 .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
         }
 
-        if (patientOpt != null) {
+        if (patientOpt?.isPresent == true) {
             patientRepository.save(patientMapper.mapDTOToDAO(patientDTO))
+            return patientOpt
+        } else {
+            throw EmptyResultDataAccessException("Patient not found by this id", 0)
         }
-
-        return patientOpt
     }
 
     fun getAllPatients(): Optional<Set<PatientDTO>> {
 
-        return Optional.of(patientRepository
+        val optPatients = Optional.of(patientRepository
             .findAll()
             .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
             .toSet())
+
+        return optPatients
     }
 }

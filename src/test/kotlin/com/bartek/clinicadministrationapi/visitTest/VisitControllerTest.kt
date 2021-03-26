@@ -31,7 +31,7 @@ class VisitControllerTest {
             patientTestDAO, doctorTestDAO
         )
 
-        every { service.addVisit(visitTest) } returns Optional.of(visitTest)
+        every { service.addVisit(visitTest) } returns ResponseEntity(visitTest, HttpStatus.OK)
 
         assertEquals(controller.addVisit(visitTest), ResponseEntity(visitTest, HttpStatus.OK))
         verify { service.addVisit(visitTest) }
