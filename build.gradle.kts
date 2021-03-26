@@ -34,7 +34,7 @@ dependencies {
 	implementation ("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation ("org.postgresql:postgresql:42.2.19")
 	implementation ("org.springframework.boot:spring-boot-starter-validation")
-
+	testImplementation("io.mockk:mockk:1.9.3")
 
 }
 

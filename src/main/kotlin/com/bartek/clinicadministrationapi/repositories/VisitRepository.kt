@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository
 import org.springframework.transaction.annotation.Transactional
 import java.sql.Date
 import java.sql.Time
+import java.util.*
 
 @Repository
 interface VisitRepository : CrudRepository<VisitDAO, Long> {

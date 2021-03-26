@@ -4,9 +4,11 @@ import com.bartek.clinicadministrationapi.domain.dtos.PatientDTO
 import com.bartek.clinicadministrationapi.mappers.PatientMapper
 import com.bartek.clinicadministrationapi.repositories.PatientRepository
 import com.bartek.clinicadministrationapi.repositories.VisitRepository
+import org.springframework.dao.EmptyResultDataAccessException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class PatientService(
@@ -15,48 +17,62 @@ class PatientService(
     val visitRepository: VisitRepository
 ) {
 
-    fun getPatientById(id: Long): ResponseEntity<PatientDTO> {
-        return patientRepository.findById(id)
+    fun getPatientById(id: Long): Optional<PatientDTO> {
+
+        val optPatient = patientRepository.findById(id)
             .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
-            .map { patientDTO -> ResponseEntity(patientDTO, HttpStatus.OK) }
-            .orElseGet { ResponseEntity(HttpStatus.NOT_FOUND) }
-    }
 
-    fun addPatient(patientDTO: PatientDTO): ResponseEntity<PatientDTO> {
-
-        patientRepository.save(patientMapper.mapDTOToDAO(patientDTO))
-
-        return ResponseEntity(HttpStatus.OK)
-    }
-
-    fun deletePatientById(id: Long): ResponseEntity<PatientDTO> {
-
-        return if (patientRepository.findById(id).equals(null)) {
-            ResponseEntity(HttpStatus.NOT_FOUND)
+        return if (optPatient.isPresent) {
+            optPatient
         } else {
+            throw EmptyResultDataAccessException("Patient not found by this id", 0)
+        }
+    }
+
+    fun addPatient(patientDTO: PatientDTO): Optional<PatientDTO> {
+
+        val opt = Optional.of(patientRepository.save(patientMapper.mapDTOToDAO(patientDTO)))
+
+        return opt
+            .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
+    }
+
+    fun deletePatientById(id: Long): Optional<PatientDTO> {
+
+        val patientOpt = patientRepository.findById(id)
+            .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
+
+        return if (!patientOpt.equals(null)) {
             visitRepository.deleteVisitsByPatientId(id)
             patientRepository.deleteById(id)
-            ResponseEntity(HttpStatus.OK)
+            patientOpt
+        } else {
+            throw EmptyResultDataAccessException("Doctor not found by this id", 0)
         }
     }
 
-    fun updatePatient(patientDTO: PatientDTO): ResponseEntity<PatientDTO>? {
+    fun updatePatient(patientDTO: PatientDTO): Optional<PatientDTO>? {
 
-        return patientDTO.id?.let {
+        val patientOpt = patientDTO.id?.let {
             patientRepository.findById(it)
-                .map { patientRepository.save(patientMapper.mapDTOToDAO(patientDTO)) }
                 .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
-                .map { patientDTO -> ResponseEntity(patientDTO, HttpStatus.OK) }
-                .orElseGet { ResponseEntity(HttpStatus.NOT_FOUND) }
+        }
+
+        if (patientOpt?.isPresent == true) {
+            patientRepository.save(patientMapper.mapDTOToDAO(patientDTO))
+            return patientOpt
+        } else {
+            throw EmptyResultDataAccessException("Patient not found by this id", 0)
         }
     }
 
-    fun getAllPatients(): ResponseEntity<Set<PatientDTO>> {
-        val set: Set<PatientDTO> = patientRepository
+    fun getAllPatients(): Optional<Set<PatientDTO>> {
+
+        val optPatients = Optional.of(patientRepository
             .findAll()
             .map { patientDAO -> patientMapper.mapDAOToDTO(patientDAO) }
-            .toSet()
+            .toSet())
 
-        return ResponseEntity(set, HttpStatus.OK)
+        return optPatients
     }
 }
