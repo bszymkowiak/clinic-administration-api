@@ -19,7 +19,6 @@ class DoctorService(
         return doctorRepository.findById(id)
             .map { doctorDAO -> doctorMapper.mapDAOToDTO(doctorDAO) }
     }
-
     fun addDoctor(doctorDTO: DoctorDTO): Optional<DoctorDTO> {
 
         val opt = Optional.of(doctorRepository.save(doctorMapper.mapDTOToDAO(doctorDTO)))
@@ -33,15 +32,16 @@ class DoctorService(
         val doctorOpt = doctorRepository.findById(id)
             .map { doctorDAO -> doctorMapper.mapDAOToDTO(doctorDAO) }
 
-        if (!doctorOpt.equals(null)) {
+        if (doctorOpt.isPresent) {
             visitRepository.deleteVisitsByDoctorId(id)
             doctorRepository.deleteById(id)
-        } 
+        }
 
         return doctorOpt
     }
 
     fun updateDoctor(doctorDTO: DoctorDTO): Optional<DoctorDTO>? {
+
 
         val doctorOpt = doctorDTO.id?.let {
             doctorRepository.findById(it)
@@ -51,7 +51,6 @@ class DoctorService(
         if (doctorOpt != null) {
             doctorRepository.save(doctorMapper.mapDTOToDAO(doctorDTO))
         }
-
         return doctorOpt
     }
 

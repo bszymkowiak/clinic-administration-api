@@ -3,9 +3,8 @@ package com.bartek.clinicadministrationapi.services
 import com.bartek.clinicadministrationapi.domain.dtos.VisitDTO
 import com.bartek.clinicadministrationapi.mappers.VisitMapper
 import com.bartek.clinicadministrationapi.repositories.VisitRepository
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Service
+import java.util.*
 
 @Service
 class VisitService(
@@ -13,59 +12,63 @@ class VisitService(
     val visitMapper: VisitMapper
 ) {
 
-    fun addVisit(visitDTO: VisitDTO): ResponseEntity<VisitDTO> {
+    fun addVisit(visitDTO: VisitDTO): Optional<VisitDTO>? {
 
-        val isTrue: VisitDTO? = visitDTO.doctor.id?.let {
-            visitRepository.findVisitsByDateAndDateTimeAndDoctorId(visitDTO.date, visitDTO.dateTime, it)
-        }?.let { visitMapper.mapDAOToDTO(it) }
-
-        return if (isTrue != null) {
-            ResponseEntity(HttpStatus.NOT_FOUND)
-        } else {
-            visitRepository.save(visitMapper.mapDTOToDAO(visitDTO))
-            ResponseEntity(HttpStatus.OK)
+        val optVisit = visitDTO.id?.let {
+            visitRepository.findVisitsByDateAndDateTimeAndDoctorId(
+                visitDTO.date, visitDTO.dateTime, it
+            )
         }
+            ?.map { visitDAO -> visitMapper.mapDAOToDTO(visitDAO) }
+
+        if (optVisit == null) {
+            visitRepository.save(visitMapper.mapDTOToDAO(visitDTO))
+        }
+
+        return optVisit
     }
 
-    fun getAllVisitsByPatientId(id: Long): ResponseEntity<Set<VisitDTO>> {
-        val set: Set<VisitDTO> = visitRepository.findVisitsByPatientId(id)
+    fun getAllVisitsByPatientId(id: Long): Optional<Set<VisitDTO>> {
+
+        return Optional.of(visitRepository.findVisitsByPatientId(id)
             .map { visitDAO -> visitMapper.mapDAOToDTO(visitDAO) }
-            .toSet()
-
-        return ResponseEntity(set, HttpStatus.OK)
-
+            .toSet())
     }
 
-    fun deleteVisitById(id: Long): ResponseEntity<VisitDTO> {
-        visitRepository.deleteById(id)
-        return ResponseEntity(HttpStatus.OK)
+    fun deleteVisitById(id: Long): Optional<VisitDTO> {
+
+        val visitOpt = visitRepository.findById(id)
+            .map { visitDAO -> visitMapper.mapDAOToDTO(visitDAO) }
+
+        if (visitOpt.isPresent) {
+            visitRepository.deleteById(id)
+        }
+
+        return visitOpt
     }
 
-    fun updateVisit(visitDTO: VisitDTO): ResponseEntity<VisitDTO>? {
+    fun updateVisit(visitDTO: VisitDTO): Optional<VisitDTO>? {
 
-        val isTrue: VisitDTO? =
-            visitDTO.doctor.id?.let {
-                visitRepository.findVisitsByDateAndDateTimeAndDoctorId(visitDTO.date, visitDTO.dateTime, it)
-                    ?.let { visitMapper.mapDAOToDTO(it) }
-            }
+        val optVisit = visitDTO.id?.let {
+            visitRepository.findVisitsByDateAndDateTimeAndDoctorId(
+                visitDTO.date, visitDTO.dateTime, it
+            )
+        }
+            ?.map { visitDAO -> visitMapper.mapDAOToDTO(visitDAO) }
 
-        if (isTrue != null) {
-            return ResponseEntity(HttpStatus.BAD_REQUEST)
-        } else {
+        if (optVisit != null) {
             visitDTO.id?.let {
                 visitRepository.findById(it)
                     .map { visitRepository.save(visitMapper.mapDTOToDAO(visitDTO)) }
             }
-            return ResponseEntity(HttpStatus.OK)
         }
-
+        return optVisit
     }
 
-    fun getAllVisits(): ResponseEntity<Set<VisitDTO>> {
-        val set: Set<VisitDTO> = visitRepository.findAll()
-            .map { visitDAO -> visitMapper.mapDAOToDTO(visitDAO) }
-            .toSet()
+    fun getAllVisits(): Optional<Set<VisitDTO>> {
 
-        return ResponseEntity(set, HttpStatus.OK)
+        return Optional.of(visitRepository.findAll()
+            .map { visitDAO -> visitMapper.mapDAOToDTO(visitDAO) }
+            .toSet())
     }
 }
